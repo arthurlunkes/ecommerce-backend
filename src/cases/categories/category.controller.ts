@@ -1,4 +1,4 @@
-import { Controller, Get, Param, ParseUUIDPipe } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpCode, HttpException, HttpStatus, Param, ParseUUIDPipe, Post, Put } from "@nestjs/common";
 import { Category } from "./category.entity";
 import { CategoryService } from "./category.service";
 
@@ -14,15 +14,43 @@ export class CategoryController {
     }
 
     @Get(':id')
-    findById(@Param('id', ParseUUIDPipe) id: string): Promise<Category> {
-        return this.categoryService.findById(id);
+    async findById(@Param('id', ParseUUIDPipe) id: string): Promise<Category> {
+        const category = await this.categoryService.findById(id);
+
+        if (!category) {
+            throw new HttpException('Category not found', HttpStatus.NOT_FOUND);
+        };
+
+        return category;
     }
 
-    save(category: Category): Promise<Category> {
+    @Post()
+    create(@Body() category: Category): Promise<Category> {
         return this.categoryService.save(category);
     }
 
-    remove(id: string): Promise<void> {
+    @Put(':id')
+    async update(@Param('id', ParseUUIDPipe) id: string, @Body() categoryToUpdate: Category): Promise<Category> {
+        const category = await this.categoryService.findById(id);
+
+        if (!category) {
+            throw new HttpException('Category not found', HttpStatus.NOT_FOUND);
+        };
+
+        categoryToUpdate.id = id;
+
+        return this.categoryService.save(categoryToUpdate);
+    }
+
+    @Delete(':id')
+    @HttpCode(HttpStatus.NO_CONTENT)
+    async remove(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
+        const category = await this.categoryService.findById(id);
+
+        if (!category) {
+            throw new HttpException('Category not found', HttpStatus.NOT_FOUND);
+        };
+
         return this.categoryService.remove(id);
     }
 }
