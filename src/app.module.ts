@@ -2,16 +2,22 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CategoryModule } from './cases/categories/category.module';
 import { BrandModule } from './cases/brands/brand.module';
+import { ProductModule } from './cases/products/product.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
+    // Configuração de conexão com o banco
+    ConfigModule.forRoot({
+      isGlobal: true
+    }),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: 'aws-0-sa-east-1.pooler.supabase.com',
-      port: +'5432',
-      username: 'postgres.nmxomntywnwtroavsxne',
-      password: 'postgres',
-      database: 'postgres',
+      host: process.env.HOST,
+      port: Number(process.env.PORT),
+      username: process.env.USERNAME,
+      password: process.env.PASSWORD,
+      database: process.env.DATABASE,
       // Auto carregar entidades
       autoLoadEntities: true,
       // Sincronizar com o banco, todas alterações são refletidas no banco
@@ -19,7 +25,8 @@ import { BrandModule } from './cases/brands/brand.module';
       synchronize: true
     }),
     CategoryModule,
-    BrandModule
+    BrandModule,
+    ProductModule
   ],
 })
 export class AppModule {}
