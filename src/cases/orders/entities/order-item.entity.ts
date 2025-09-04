@@ -1,4 +1,4 @@
-import { Product } from 'src/cases/products/product.entity'
+import { Product } from 'src/cases/produtcs/product.entity'
 import {
   Column,
   Entity,

@@ -4,12 +4,12 @@ import {
   Delete,
   Get,
   HttpCode,
+  HttpException,
   HttpStatus,
   Param,
   ParseUUIDPipe,
   Post,
   Put,
-  Req,
 } from '@nestjs/common'
 import { Brand } from './brand.entity'
 import { BrandService } from './brand.service'
@@ -19,33 +19,51 @@ export class BrandController {
   constructor(private readonly service: BrandService) {}
 
   @Get()
-  async findAll(): Promise<Brand[]> {
+  findAll(): Promise<Brand[]> {
     return this.service.findAll()
   }
 
-  @Get('/:id')
+  @Get(':id')
   async findById(@Param('id', ParseUUIDPipe) id: string): Promise<Brand> {
-    return await this.service.findById(id)
+    const found = await this.service.findById(id)
+
+    if (!found) {
+      throw new HttpException('Brand not found', HttpStatus.NOT_FOUND)
+    }
+
+    return found
   }
 
   @Post()
-  @HttpCode(HttpStatus.CREATED)
-  async save(@Body() category: Brand): Promise<Brand> {
-    return await this.service.save(category)
+  create(@Body() brand: Brand): Promise<Brand> {
+    return this.service.save(brand)
   }
 
   @Put(':id')
-  @HttpCode(HttpStatus.OK)
   async update(
     @Param('id', ParseUUIDPipe) id: string,
-    @Body() category: Brand,
+    @Body() brand: Brand,
   ): Promise<Brand> {
-    return await this.service.update(id, category)
+    const found = await this.service.findById(id)
+
+    if (!found) {
+      throw new HttpException('Brand not found', HttpStatus.NOT_FOUND)
+    }
+
+    brand.id = id
+
+    return this.service.save(brand)
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async delete(@Param('id', ParseUUIDPipe) id: string) {
-    return await this.service.delete(id)
+  async remove(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
+    const found = await this.service.findById(id)
+
+    if (!found) {
+      throw new HttpException('Brand not found', HttpStatus.NOT_FOUND)
+    }
+
+    return this.service.remove(id)
   }
 }
