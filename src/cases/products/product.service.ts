@@ -1,28 +1,36 @@
-import { Repository } from "typeorm";
-import { Product } from "./producty.entity";
-import { InjectRepository } from "@nestjs/typeorm";
-import { Injectable } from "@nestjs/common";
+import { Repository } from 'typeorm'
+import { Product } from './product.entity'
+import { InjectRepository } from '@nestjs/typeorm'
+import { Injectable } from '@nestjs/common'
+import { Category } from '../categories/category.entity'
 
 @Injectable()
 export class ProductService {
-    constructor(
-        @InjectRepository(Product)
-        private repository: Repository<Product>
-    ) {}
+  constructor(
+    @InjectRepository(Product)
+    private repository: Repository<Product>,
+  ) {}
 
-    findAll(): Promise<Product[]> {
-        return this.repository.find();
+  findAll(category?: Category | null): Promise<Product[]> {
+    if (!category) {
+      return this.repository.find()
+    } else {
+      return this.repository.find({
+        where: { category: category },
+        relations: ['category'],
+      })
     }
+  }
 
-    findById(id: string): Promise<Product | null> {
-        return this.repository.findOneBy({ id: id });
-    }
+  findById(id: string): Promise<Product | null> {
+    return this.repository.findOneBy({ id: id })
+  }
 
-    save(Brand: Product): Promise<Product> {
-        return this.repository.save(Brand);
-    }
+  save(product: Product): Promise<Product> {
+    return this.repository.save(product)
+  }
 
-    async remove(id: string): Promise<void> {
-        await this.repository.delete(id);
-    }
+  async remove(id: string): Promise<void> {
+    await this.repository.delete(id)
+  }
 }

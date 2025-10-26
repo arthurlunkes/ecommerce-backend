@@ -1,56 +1,77 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpException, HttpStatus, Param, ParseUUIDPipe, Post, Put } from "@nestjs/common";
-import { Product } from "./producty.entity";
-import { ProductService } from "./product.service";
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpException,
+  HttpStatus,
+  Param,
+  ParseUUIDPipe,
+  Post,
+  Put,
+  Query,
+} from '@nestjs/common'
+import { Product } from './product.entity'
+import { ProductService } from './product.service'
+import { CategoryService } from '../categories/category.service'
+import { validate as isUUID } from 'uuid'
 
 @Controller('products')
 export class ProductController {
-    constructor(
-        private readonly productService: ProductService
-    ) {}
+  constructor(
+    private readonly categoryService: CategoryService,
+    private readonly service: ProductService,
+  ) {}
 
-    @Get()
-    findAll(): Promise<Product[]> {
-        return this.productService.findAll();
+  @Get()
+  async find(@Query('categoryId') categoryId: string): Promise<Product[]> {
+    if (categoryId && isUUID(categoryId)) {
+      const category = await this.categoryService.findById(categoryId)
+      return this.service.findAll(category)
     }
 
-    @Get(':id')
-    async findById(@Param('id', ParseUUIDPipe) id: string): Promise<Product> {
-        const brand = await this.productService.findById(id);
+    return this.service.findAll()
+  }
 
-        if (!brand) {
-            throw new HttpException('Brand not found', HttpStatus.NOT_FOUND);
-        };
+  @Get(':id')
+  async findById(@Param('id', ParseUUIDPipe) id: string): Promise<Product> {
+    const found = await this.service.findById(id)
 
-        return brand;
+    if (!found) {
+      throw new HttpException('Product not found', HttpStatus.NOT_FOUND)
     }
 
-    @Post()
-    create(@Body() brand: Product): Promise<Product> {
-        return this.productService.save(brand);
+    return found
+  }
+
+  @Post()
+  create(@Body() product: Product): Promise<Product> {
+    return this.service.save(product)
+  }
+
+  @Put(':id')
+  async update(@Param('id', ParseUUIDPipe) id: string, @Body() product: Product): Promise<Product> {
+    const found = await this.service.findById(id)
+
+    if (!found) {
+      throw new HttpException('Product not found', HttpStatus.NOT_FOUND)
     }
 
-    @Put(':id')
-    async update(@Param('id', ParseUUIDPipe) id: string, @Body() productToUpdate: Product): Promise<Product> {
-        const brand = await this.productService.findById(id);
+    product.id = id
 
-        if (!brand) {
-            throw new HttpException('Product not found', HttpStatus.NOT_FOUND);
-        };
+    return this.service.save(product)
+  }
 
-        productToUpdate.id = id;
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async remove(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
+    const found = await this.service.findById(id)
 
-        return this.productService.save(productToUpdate);
+    if (!found) {
+      throw new HttpException('Product not found', HttpStatus.NOT_FOUND)
     }
 
-    @Delete(':id')
-    @HttpCode(HttpStatus.NO_CONTENT)
-    async remove(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
-        const product = await this.productService.findById(id);
-
-        if (!product) {
-            throw new HttpException('Product not found', HttpStatus.NOT_FOUND);
-        };
-
-        return this.productService.remove(id);
-    }
+    return this.service.remove(id)
+  }
 }
