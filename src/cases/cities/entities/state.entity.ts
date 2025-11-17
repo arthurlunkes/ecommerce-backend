@@ -1,16 +1,16 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm'
 
 @Entity('state')
 export class State {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id: string
 
   @Column({ length: 60, nullable: false })
-  name: string;
+  name: string
 
   @Column({ length: 2, nullable: false })
-  ibge: string;
+  ibge: string
 
   @Column({ length: 2, nullable: false })
-  acronym: string;
+  acronym: string
 }
