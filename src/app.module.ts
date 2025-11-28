@@ -5,7 +5,7 @@ import { BrandModule } from './cases/brands/brand.module'
 import { CustomerModule } from './cases/customers/customer.module'
 import { ConfigModule } from '@nestjs/config'
 import { CityModule } from './cases/cities/city.module'
-import { ProductModule } from './cases/produtcs/product.module'
+import { ProductModule } from './cases/products/product.module'
 
 @Module({
   imports: [
