@@ -24,8 +24,8 @@ export class Order {
   @PrimaryGeneratedColumn('uuid')
   id: string
 
-  @ManyToOne(() => Customer, { eager: true, nullable: false })
-  customer: Customer
+  @ManyToOne(() => Customer, { eager: true, nullable: true })
+  customer: Customer | null
 
   @Column('decimal', { nullable: true, precision: 10, scale: 2 })
   shipping: number

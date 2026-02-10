@@ -18,6 +18,10 @@ export class CustomerService {
     return this.repository.findOneBy({ id: id })
   }
 
+  findByName(name: string): Promise<Customer | null> {
+    return this.repository.findOneBy({ name: name })
+  }
+
   save(customer: Customer): Promise<Customer> {
     return this.repository.save(customer)
   }
